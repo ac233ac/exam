@@ -51,10 +51,6 @@ public class VideoWebSocketServer {
             rooms.computeIfAbsent(roomId, k -> new ConcurrentHashMap<>()).put(username, session);
             System.out.println("User " + username + " (ID: " + userId + ") joined room " + roomId);
 
-            // 检查房间用户列表是否更新正确
-            List<String> currentUsers = new ArrayList<>(rooms.get(roomId).keySet());
-            System.out.println("Current users in room " + roomId + ": " + currentUsers);
-
             // 广播更新房间用户列表
             broadcastRoomUsers(roomId);
         } catch (Exception e) {
@@ -67,6 +63,7 @@ public class VideoWebSocketServer {
             }
         }
     }
+
 
 
     @OnMessage
@@ -82,6 +79,12 @@ public class VideoWebSocketServer {
                    // handleJoinMessage(json, session);
                     break;
                 case "offer":
+                    if (shouldSendOffer(json)) {
+                        forwardSignal(json);
+                    } else {
+                        System.out.println("Skipping redundant offer from " + username);
+                    }
+                    break;
                 case "answer":
                 case "candidate":
                     forwardSignal(json);
@@ -136,11 +139,18 @@ public class VideoWebSocketServer {
             return;
         }
 
+        // 获取所有用户，并标记最后加入的用户为 newJoiner
         List<String> usernames = new ArrayList<>(room.keySet());
-        System.out.println("Broadcasting users in room " + roomId + ": " + usernames);
+        String newJoiner = usernames.get(usernames.size() - 1); // 最新加入的用户
 
-        String message = String.format("{\"type\":\"roomUsers\", \"users\":%s}", new org.json.JSONArray(usernames).toString());
+        // 构建广播消息，包含用户列表和新加入的用户
+        String message = String.format(
+                "{\"type\":\"roomUsers\", \"users\":%s, \"newJoiner\":\"%s\"}",
+                new org.json.JSONArray(usernames).toString(),
+                newJoiner
+        );
 
+        // 广播消息到所有用户
         room.values().forEach(session -> {
             try {
                 session.getBasicRemote().sendText(message);
@@ -150,6 +160,8 @@ public class VideoWebSocketServer {
             }
         });
     }
+
+
 
 
 
@@ -209,4 +221,22 @@ public class VideoWebSocketServer {
             e.printStackTrace();
         }
     }
+
+    private boolean shouldSendOffer(JSONObject json) {
+        String senderUsername = json.getString("senderId");
+        String targetUsername = json.getString("targetId");
+
+        // 如果目标用户不在房间中，或发起者和目标用户相同，则不发送 Offer
+        if (!rooms.get(roomId).containsKey(targetUsername) || senderUsername.equals(targetUsername)) {
+            return false;
+        }
+
+        // 只允许较晚加入的用户发送 Offer 给早先加入的用户
+        List<String> sortedUsers = new ArrayList<>(rooms.get(roomId).keySet());
+        int senderIndex = sortedUsers.indexOf(senderUsername);
+        int targetIndex = sortedUsers.indexOf(targetUsername);
+
+        return senderIndex > targetIndex;
+    }
+
 }
