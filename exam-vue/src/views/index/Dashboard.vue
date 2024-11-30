@@ -7,15 +7,13 @@
 
       <el-row>
         <el-col :span="15" :offset="5">
-          <h3>1、推荐项目:</h3>
+          <h3>1、项目地址:</h3>
           <ul>
-            <li><a href="https://gitee.com/wzhouzhou/vue_wzz_cloudMusic" target="_blank">高仿网易云音乐</a></li>
-            <li><a href="https://gitee.com/wzhouzhou/privateBlog" target="_blank">博客系统</a></li>
+            <li><a href="https://github.com/ac233ac/exam/tree/main" target="_blank">考试系统</a></li>
           </ul>
           <h3>2、系统描述:</h3>
           <p>考试系统是一个多角色在线培训考试系统，系统集成了用户管理、角色管理、题库管理、试
-            题管理、考试管理、在线考试等功能，考试流程完善。实现一整套完整体系的考试系统，方便用
-            户在此系统中进行练习并不断提升自己，在考试中不断进步。</p>
+            题管理、考试管理、在线考试，视频面试等功能，考试流程完善。实现一整套完整体系的考试系统，方便用户在此系统中进行练习并不断提升自己，在考试中不断进步。</p>
           <h3>3、主要功能</h3>
           <div style="margin-left: 2em">
             <h4>1.权限控制</h4>
