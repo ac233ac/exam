@@ -14,7 +14,7 @@ services:
     ports:
       - 3306:3306
     environment:
-      - MYSQL_ROOT_PASSWORD=wzz233
+      - MYSQL_ROOT_PASSWORD=scut233
     privileged: true
     volumes:
       - /opt/exam/volume_data/mysql/data:/var/lib/mysql
@@ -23,7 +23,7 @@ services:
   redis:
     container_name: exam_redis
     image: redis:6
-    command: redis-server /etc/redis/redis.conf --requirepass wzz233
+    command: redis-server /etc/redis/redis.conf --requirepass scut233
     privileged: true
     ports:
       - 6379:6379
